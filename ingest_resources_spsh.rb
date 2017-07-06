@@ -13,8 +13,8 @@ client = AspaceIngester.new(ingest_logger, error_logger)
 client.authorize
 
 resources = ResourceLoader.new(File.expand_path(ARGV.shift))
-resources.each do |resource|
-  client.queue_json(JSON.dump([resource]), 3 ,"#{resource['id_0']}:#{resource['ead_id']}")
+resources.each do |batch|
+  client.queue_json(JSON.dump(batch), 3 ,"#{batch[0]['id_0']}:#{batch[0]['ead_id']}")
 end
 
 client.run
