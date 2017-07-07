@@ -209,6 +209,12 @@ class ResourceLoader
   }
 
   #ASK: Rights statement looks like it needs discussion
+  RightsStmtFM = {
+    'rights_type' => 118,
+    'status' => 120,
+    'jurisdiction' => 121,
+    'end_date' => 123
+  }
 
   def initialize(fpath)
     csv = CSV.open(fpath)
@@ -435,6 +441,17 @@ class ResourceLoader
     handle_external_document!(LDFExtDocFM, row, external_documents)
     handle_external_document!(LEFExtDocFM, row, external_documents)
     handle_external_document!(LFAFExtDocFM, row, external_documents)
+
+    resource['rights_statements'] = []
+    if row[RightsStmtFM['rights_type']]
+      resource['rights_statements'] << {
+        'jsonmodel_type' => 'rights_statement',
+        'rights_type' => row[RightsStmtFM['rights_type']],
+        'status' => row[RightsStmtFM['status']],
+        'jurisdiction' => row[RightsStmtFM['jurisdiction']],
+        'end_date' => row[RightsStmtFM['end_date']]
+      }
+    end
 
     results = [resource]
     results << processing_plan if processing_plan
