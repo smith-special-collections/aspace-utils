@@ -208,13 +208,44 @@ class ResourceLoader
     'publish' => 100
   }
 
-  #ASK: Rights statement looks like it needs discussion
-  RightsStmtFM = {
+  # License Rights statement
+  # bespoke bc fewer and diff fields
+  RSLicenseFM = {
+    'rights_type' => 101,
+    'license_identifier_terms' => 102
+  }
+
+  # Three more-or-less "regular" rights statements
+  RightsStmtAFM = {
+    'rights_type' => 103,
+    'materials' => 104,
+    'ip_status' => 105,
+    'jurisdiction' => 106,
+    'type_note' => 107,
+    'permissions' => 108,
+    'end_date' => 109,
+    'granted' => 110
+  }
+
+  RightsStmtBFM = {
+    'rights_type' => 111,
+    'materials' => 112,
+    'ip_status' => 113,
+    'jurisdiction' => 114,
+    'type_note' => 115,
+    'end_date' => 116,
+    'granted' => 117
+  }
+
+  RightsStmtCFM = {
     'rights_type' => 118,
-    'status' => 120,
+    'materials' => 119,
+    'ip_status' => 120,
     'jurisdiction' => 121,
+    'type_note' => 122,
     'end_date' => 123
   }
+
 
   def initialize(fpath)
     csv = CSV.open(fpath)
@@ -275,6 +306,51 @@ class ResourceLoader
     end
   end
 
+  # Handle rights statements
+  def handle_rights_statement!(fm, row, stmts)
+    if row[fm['rights_type']]
+      rights_stmt = {
+        'jsonmodel_type' => 'rights_statement',
+      }
+
+      # handle other direct fields on the rights statement
+      %w|rights_type license_identifier_terms ip_status jurisdiction end_date|.each do |field|
+        rights_stmt[field] = row[fm[field]] if fm[field] && row[fm[field]]
+      end
+      # handle note_rights_statements
+      %w|materials type_note|.each do |field|
+        if fm[field] && row[fm[field]]
+          notes = rights_stmt['notes'] ||= []
+          notes << {
+            'jsonmodel_type' => 'note_rights_statement',
+            'type' => field,
+            'content' => [row[fm[field]]]
+          }
+        end
+      end
+
+      # handle note_rights_statement_acts
+      act_types = %w|permissions granted|
+      if act_types.any? {|t| fm.key? t}
+        acts = rights_stmt['acts'] ||= []
+        act = {
+          'jsonmodel_type' => 'rights_statement_act',
+          'notes' => []
+        }
+        act_types.each do |field|
+          if fm[field] && row[fm[field]]
+            act['notes'] << {
+              'jsonmodel_type' => 'note_rights_statement_act',
+              'type' => field,
+              'content' => [row[fm[field]]]
+            }
+          end
+        end
+      end
+
+      stmts << rights_stmt
+    end
+  end
 
   def process_row(row)
     # Handle fields that are just set directly on resource object
@@ -379,7 +455,6 @@ class ResourceLoader
     handle_note!(AccrualIntFM, row, notes)
     handle_note!(AccrualExtFM, row, notes)
 
-    # ASK: type note_bioghist exists, but can't be attached to resource, just agent - for now, ingest as note
     # Bioghist
     if row[BioghistFM['content']]
       notes << {
@@ -442,15 +517,13 @@ class ResourceLoader
     handle_external_document!(LEFExtDocFM, row, external_documents)
     handle_external_document!(LFAFExtDocFM, row, external_documents)
 
-    resource['rights_statements'] = []
-    if row[RightsStmtFM['rights_type']]
-      resource['rights_statements'] << {
-        'jsonmodel_type' => 'rights_statement',
-        'rights_type' => row[RightsStmtFM['rights_type']],
-        'status' => row[RightsStmtFM['status']],
-        'jurisdiction' => row[RightsStmtFM['jurisdiction']],
-        'end_date' => row[RightsStmtFM['end_date']]
-      }
+    if [RSLicenseFM, RightsStmtAFM, RightsStmtBFM, RightsStmtCFM].map do |fm|
+         row[fm['rights_type']]  end.any?
+      rights_statements = resource['rights_statements'] = []
+      handle_rights_statement!(RSLicenseFM, row, rights_statements)
+      handle_rights_statement!(RightsStmtAFM, row, rights_statements)
+      handle_rights_statement!(RightsStmtBFM, row, rights_statements)
+      handle_rights_statement!(RightsStmtCFM, row, rights_statements)
     end
 
     results = [resource]
