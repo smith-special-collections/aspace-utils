@@ -13,8 +13,36 @@ client = AspaceIngester.new(ingest_logger, error_logger)
 client.authorize
 
 resources = ResourceLoader.new(File.expand_path(ARGV.shift))
+eadid_mapping = JSON.parse(IO.read(File.expand_path(ARGV.shift)))
+
 resources.each do |batch|
-  client.queue_json(JSON.dump(batch), 3 ,"#{batch[0]['id_0']}:#{batch[0]['ead_id']}")
+  spsh = batch.first
+  if spsh['ead_id'] &&
+     (ead = client.resource(repo_id: 3, id: eadid_mapping[spsh['ead_id']]))
+    begin
+      %w|title finding_aid_title id_0 publish restrictions
+       repository_processing_note finding_aid_status finding_aid_note|.each do |direct_field|
+        ead[direct_field] = spsh[direct_field] if spsh.key? direct_field
+      end
+    rescue
+      binding.pry
+    end
+
+    # Direct array children that should be appended if present in spsh
+    %w|revision_statements deaccessions external_documents rights_statements|.each do |append_field|
+      ead[append_field] |= spsh[append_field] if spsh.key? append_field
+    end
+
+    # Some classes of notes should be appended if in spsh
+    auto_append = %w|accruals accessrestrict RestrictedSpecColl RestrictedCurApprSpecColl userestrict|
+    if spsh['notes'].any? { |note| auto_append.include? note['type'] }
+      ead['notes'] |= spsh['notes'].select { |note| auto_append.include? note['type'] }
+    end
+
+    client.queue_update(ead)
+  else
+    client.queue_json(batch, 3 ,"#{batch[0]['id_0']}:#{batch[0]['ead_id']}")
+  end
 end
 
 client.run

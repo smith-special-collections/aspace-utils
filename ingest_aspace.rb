@@ -23,4 +23,6 @@ end
 ingest_logger.info { "OK: #{client.successes} FAIL: #{client.failures} TOTAL: #{client.total}" }
 ingest_logger.info { "END INGEST" }
 
+IO.write("eadids_2_ids.json", client.eadid_id_mapping.to_json)
+
 client.close
