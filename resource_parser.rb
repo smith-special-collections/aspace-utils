@@ -12,238 +12,241 @@ class ResourceLoader
     'finding_aid_title'=>1,
     'title' => 1,
     'id_0'=>2,
-    'ead_id'=>3,
-    'level'=>4,
-    'resource_type'=>5,
-    'language'=>6,
-    'repository_processing_note'=>9,
-    'finding_aid_status'=>12,
-    'finding_aid_note'=>13
+    'id_1' => 3,
+    'id_2' => 4,
+
+    'ead_id'=>5,
+    'level'=>6,
+    'resource_type'=>7,
+    'language'=>8,
+    'repository_processing_note'=>11,
+    'finding_aid_status'=>14,
+    'finding_aid_note'=>15
   }
   # Boolean Field Mapping (1 -> true, 0 -> false)
   BFM = {
-    'publish' => 7,
-    'restrictions'=>8
+    'publish' => 9,
+    'restrictions'=>10
   }
   # Extent Field Mapping
   EFM = {
-    'portion' => 14,
-    'number' => 15,
-    'extent_type' => 16,
-    'container_summary' => 17
+    'portion' => 16,
+    'number' => 17,
+    'extent_type' => 18,
+    'container_summary' => 19
   }
   # Revision Statement Field Mapping
   RSFM = {
-    'description' => 19
+    'description' => 21
   }
 
   # Inclusive Date Field Mapping
   IDateFM = {
-    'date_type' => 20,
-    'label' => 21,
-    'certainty' => 22,
-    'expression' => 23,
-    'begin' => 24,
-    'end' => 25
+    'date_type' => 22,
+    'label' => 23,
+    'certainty' => 24,
+    'expression' => 25,
+    'begin' => 26,
+    'end' => 27
   }
 
   # Bulk Date Field Mapping
   BDateFM = {
-    'date_type' => 26,
-    'label' => 27,
-    'expression' => 28
+    'date_type' => 28,
+    'label' => 29,
+    'expression' => 30
   }
 
   # Deaccession Field Mapping
   DeaccFM = {
-    'scope' => 29,
-    'description' => 30,
-    'disposition' => 31,
-    'date_type' => 32,
-    'label' => 33,
-    'expression' => 34,
-    'begin' => 35
+    'scope' => 31,
+    'description' => 32,
+    'disposition' => 33,
+    'date_type' => 34,
+    'label' => 35,
+    'expression' => 36,
+    'begin' => 37
   }
 
   # Accrual mappings
   AccrualIntFM = {
-    'type' => 36,
-    'content' => 37,
-    'publish' => 38
+    'type' => 38,
+    'content' => 39,
+    'publish' => 40
   }
 
   AccrualExtFM = {
-    'type' => 39,
-    'content' => 40,
-    'publish' => 41
-  }
-
-  # Bioghist
-  BioghistFM = {
+    'type' => 41,
     'content' => 42,
     'publish' => 43
   }
 
+  # Bioghist
+  BioghistFM = {
+    'content' => 44,
+    'publish' => 45
+  }
+
   # Conditions governing access
   CGAFM = {
-    'type' => 44,
-    'content' => 45,
-    'local_access_restriction_type' => 46,
-    'publish' => 47
+    'type' => 46,
+    'content' => 47,
+    'local_access_restriction_type' => 48,
+    'publish' => 49
   }
 
   # Condition Governing Access: SSC Flavor
   CGASSCFM = {
-    'type' => 48,
-    'content' => 49,
-    'end' => 50,
-    'local_access_restriction_type' => 51,
-    'publish' => 52
+    'type' => 50,
+    'content' => 51,
+    'end' => 52,
+    'local_access_restriction_type' => 53,
+    'publish' => 54
   }
 
   # Condition governing use
   CGUFM = {
-    'type' => 53,
-    'content' => 54,
-    'publish' => 55
+    'type' => 55,
+    'content' => 56,
+    'publish' => 57
   }
 
   # Extistence and Locations of copies, originals
   ExtLocCopFM = {
-    'type' => 56,
-    'content' => 57,
-    'publish' => 58
+    'type' => 58,
+    'content' => 59,
+    'publish' => 60
   }
 
   ExtLocOrigFM = {
-    'type' => 59,
-    'content' => 60,
-    'publish' => 61
+    'type' => 61,
+    'content' => 62,
+    'publish' => 63
   }
 
   # Donor note
   GenDonorFM = {
-    'type' => 62,
-    'label' => 63,
-    'content' => 64,
-    'publish' => 65
+    'type' => 64,
+    'label' => 65,
+    'content' => 66,
+    'publish' => 67
   }
 
   # General note
   GenNoteFM = {
-    'type' => 66,
-    'content' => 67,
-    'publish' => 68
+    'type' => 68,
+    'content' => 69,
+    'publish' => 70
   }
 
   # Immediate Source of Acquisition
   ImmAcqFM = {
-    'type' => 69,
-    'content' => 70,
-    'publish' => 71
+    'type' => 71,
+    'content' => 72,
+    'publish' => 73
   }
 
   # Language of Materials
   LangMatFM = {
-    'type' => 72, # ignored, ss doesn't match aspace?
-    'content' => 73
+    'type' => 74, # ignored, ss doesn't match aspace?
+    'content' => 75
   }
 
   # Other Finding Aids
   OtherFAIDFM = {
-    'type' => 74,
-    'content' => 75,
-    'publish' => 76
+    'type' => 76,
+    'content' => 77,
+    'publish' => 78
   }
 
   # Preferred Citation
   PrefCiteFM = {
-    'type' => 77,
-    'content' => 78,
-    'publish' => 79
+    'type' => 79,
+    'content' => 80,
+    'publish' => 81
   }
 
   # Related Materials
   RelMatFM = {
-    'type' => 80,
-    'content' => 81,
-    'publish' => 82
+    'type' => 82,
+    'content' => 83,
+    'publish' => 84
   }
 
   # Scope and Content
   ScopContFM = {
-    'type' => 83,
-    'content' => 84,
-    'publish' => 85
+    'type' => 85,
+    'content' => 86,
+    'publish' => 87
   }
 
   # Collection Management
   PPlanFM = {
-    'processing_hours_per_foot_estimate' => 86,
-    'processing_plan' => 87,
-    'processing_priority' => 88,
-    'processing_funding_source' => 89,
-    'processors' => 90,
-    'processing_status' => 91
+    'processing_hours_per_foot_estimate' => 88,
+    'processing_plan' => 89,
+    'processing_priority' => 90,
+    'processing_funding_source' => 91,
+    'processors' => 92,
+    'processing_status' => 93
   }
 
   # Location of donor files
   LDFExtDocFM = {
-    'title' => 92,
-    'location' => 93,
-    'publish' => 94
+    'title' => 94,
+    'location' => 95,
+    'publish' => 96
   }
 
   # Location of electronic files
   LEFExtDocFM = {
-    'title' => 95,
-    'location' => 96,
-    'publish' => 97
+    'title' => 97,
+    'location' => 98,
+    'publish' => 99
   }
 
   # Location of Finding Aid File
   LFAFExtDocFM = {
-    'title' => 98,
-    'location' => 99,
-    'publish' => 100
+    'title' => 100,
+    'location' => 101,
+    'publish' => 102
   }
 
   # License Rights statement
   # bespoke bc fewer and diff fields
   RSLicenseFM = {
-    'rights_type' => 101,
-    'license_identifier_terms' => 102
+    'rights_type' => 103,
+    'license_identifier_terms' => 104
   }
 
   # Three more-or-less "regular" rights statements
   RightsStmtAFM = {
-    'rights_type' => 103,
-    'materials' => 104,
-    'ip_status' => 105,
-    'jurisdiction' => 106,
-    'type_note' => 107,
-    'permissions' => 108,
-    'end_date' => 109,
-    'granted' => 110
+    'rights_type' => 105,
+    'materials' => 106,
+    'ip_status' => 107,
+    'jurisdiction' => 108,
+    'type_note' => 109,
+    'permissions' => 110,
+    'end_date' => 111,
+    'granted' => 112
   }
 
   RightsStmtBFM = {
-    'rights_type' => 111,
-    'materials' => 112,
-    'ip_status' => 113,
-    'jurisdiction' => 114,
-    'type_note' => 115,
-    'end_date' => 116,
-    'granted' => 117
+    'rights_type' => 113,
+    'materials' => 114,
+    'ip_status' => 115,
+    'jurisdiction' => 116,
+    'type_note' => 117,
+    'end_date' => 118,
+    'granted' => 119
   }
 
   RightsStmtCFM = {
-    'rights_type' => 118,
-    'materials' => 119,
-    'ip_status' => 120,
-    'jurisdiction' => 121,
-    'type_note' => 122,
-    'end_date' => 123
+    'rights_type' => 120,
+    'materials' => 121,
+    'ip_status' => 122,
+    'jurisdiction' => 123,
+    'type_note' => 124,
+    'end_date' => 125
   }
 
 
