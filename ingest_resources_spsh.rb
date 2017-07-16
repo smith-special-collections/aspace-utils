@@ -18,7 +18,7 @@ eadid_mapping = JSON.parse(IO.read(File.expand_path(ARGV.shift)))
 resources.each do |batch|
   spsh = batch.first
   if spsh['ead_id'] &&
-     (ead = client.resource(repo_id: 3, id: eadid_mapping[spsh['ead_id']]))
+     (ead = client.resource(repo_id: $config['repositories']['mnsss'], id: eadid_mapping[spsh['ead_id']]))
 
     %w|title finding_aid_title id_0 publish restrictions
        repository_processing_note finding_aid_status finding_aid_note|.each do |direct_field|
