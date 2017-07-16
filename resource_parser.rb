@@ -501,20 +501,21 @@ class ResourceLoader
     handle_note!(ScopContFM, row, notes)
 
     # Linked - included in final results immediately before return of fn
-    processing_plan = {
-      'jsonmodel_type' => 'collection_management',
-      'processing_hours_per_foot_estimate' => row[PPlanFM['processing_hours_per_foot_estimate']],
-      'processing_plan' => row[PPlanFM['processing_plan']],
-      'processing_priority' => row[PPlanFM['processing_priority']],
-      'processing_funding_source' => row[PPlanFM['processing_funding_source']],
-      'processors' => row[PPlanFM['processors']],
-      'processing_status' => row[PPlanFM['processing_status']],
-      'resource' => {
-        'ref' => temp_id
-      },
-      'uri' => "/repositories/import/collection_management/import_#{SecureRandom::uuid}"
-    }
-
+    processing_plan = if PPlanFM['processing_plan']
+                        {
+                          'jsonmodel_type' => 'collection_management',
+                          'processing_hours_per_foot_estimate' => row[PPlanFM['processing_hours_per_foot_estimate']],
+                          'processing_plan' => row[PPlanFM['processing_plan']],
+                          'processing_priority' => row[PPlanFM['processing_priority']],
+                          'processing_funding_source' => row[PPlanFM['processing_funding_source']],
+                          'processors' => row[PPlanFM['processors']],
+                          'processing_status' => row[PPlanFM['processing_status']],
+                          'resource' => {
+                            'ref' => temp_id
+                          },
+                          'uri' => "/repositories/import/collection_management/import_#{SecureRandom::uuid}"
+                        }
+                      end
     external_documents = resource['external_documents'] = []
     handle_external_document!(LDFExtDocFM, row, external_documents)
     handle_external_document!(LEFExtDocFM, row, external_documents)

@@ -1,5 +1,6 @@
 require 'yaml'
 require 'json'
+require 'securerandom'
 require 'bundler'
 Bundler.require(:default)
 
@@ -96,14 +97,65 @@ class AspaceIngester
     raise "Failed to aquire auth"
   end
 
-  def resource(repo_id:, id:)
-    res = Typhoeus.get(URI.join(@base_uri, "/repositories/#{repo_id}/resources/#{id}"),
-                       headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
-                                 'Content-type' => 'application/json; charset=UTF-8'})
-    if res.code == 200
-      parse_json(res.body)
+  def agent(agent_data)
+    search_res = Typhoeus.get(URI.join(@base_uri, '/search'),
+                              headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                        'Content-type' => 'application/json; UTF-8'},
+                              params: {q: "agents_text=\"#{agent_data[:names][0][:primary_name]}\"~0",
+                                       mm: '100%',
+                                       page: 1,
+                                       page_size: 250,
+                                       type: ['agent']})
+    if search_res.code == 200 && (payload = parse_json(search_res.body)) && !payload['results'].empty?
+      agent_record = parse_json(payload['results'][0]['json'])
+
+      if agent_record['names'][0]['primary_name'] == agent_data[:names][0][:primary_name]
+        return agent_record['uri']
+      end
+    end
+    # Failure case
+    agent_data[:uri] = "/repositories/import/agent_corporate_entity/import_#{SecureRandom::uuid}"
+    res = Typhoeus.post(URI.join(@base_uri, '/repositories/1/batch_imports'),
+                        headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                  'Content-type' => 'application/json; UTF-8'},
+                        body: JSON.dump([agent_data]))
+
+    if res.code == 200 && (payload = parse_json(res.body))
+      payload.last.values.last.values.last.first
     else
       nil
+    end
+  end
+
+
+  def resource(repo_id:, id: nil, id_n: nil)
+    if id
+      res = Typhoeus.get(URI.join(@base_uri, "/repositories/#{repo_id}/resources/#{id}"),
+                         headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                   'Content-type' => 'application/json; charset=UTF-8'})
+      if res.code == 200
+        parse_json(res.body)
+      else
+        nil
+      end
+    elsif id_n
+      search_res = Typhoeus.get(URI.join(@base_uri, '/search'),
+                                headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                          'Content-type' => 'application/json; UTF-8'},
+                                params: {q: "identifier=\"#{id_n.compact.join('-')}\"~0",
+                                         mm: '100%',
+                                         page: 1,
+                                         page_size: 250,
+                                         type: ['resource']})
+      if search_res.code == 200 && (search_payload = parse_json(search_res.body))
+        resource = search_payload['results'].find do |el|
+          JSON.parse(el['json']).values_at(*%w|id_0 id_1 id_2 id_3|).compact == id_n.compact
+        end
+        resource
+      else
+        nil
+      end
+
     end
   end
 

@@ -19,14 +19,12 @@ resources.each do |batch|
   spsh = batch.first
   if spsh['ead_id'] &&
      (ead = client.resource(repo_id: 3, id: eadid_mapping[spsh['ead_id']]))
-    begin
-      %w|title finding_aid_title id_0 publish restrictions
+
+    %w|title finding_aid_title id_0 publish restrictions
        repository_processing_note finding_aid_status finding_aid_note|.each do |direct_field|
-        ead[direct_field] = spsh[direct_field] if spsh.key? direct_field
-      end
-    rescue
-      binding.pry
+      ead[direct_field] = spsh[direct_field] if spsh.key? direct_field
     end
+
 
     # Direct array children that should be appended if present in spsh
     %w|revision_statements deaccessions external_documents rights_statements|.each do |append_field|
@@ -41,7 +39,7 @@ resources.each do |batch|
 
     client.queue_update(ead)
   else
-    client.queue_json(batch, 3 ,"#{batch[0]['id_0']}:#{batch[0]['ead_id']}")
+    client.queue_json(batch, $config['repositories']['mnsss'], "#{batch[0]['id_0']}:#{batch[0]['ead_id']}")
   end
 end
 
