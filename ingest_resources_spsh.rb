@@ -20,7 +20,7 @@ resources.each do |batch|
   if spsh['ead_id'] &&
      (ead = client.resource(repo_id: $config['repositories']['mnsss'], id: eadid_mapping[spsh['ead_id']]))
 
-    %w|title finding_aid_title id_0 publish restrictions
+    %w|title finding_aid_title id_0 id_1 id_2 publish restrictions
        repository_processing_note finding_aid_status finding_aid_note|.each do |direct_field|
       ead[direct_field] = spsh[direct_field] if spsh.key? direct_field
     end
