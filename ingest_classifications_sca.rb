@@ -8,7 +8,7 @@ classifications = []
 classification_terms = []
 identifier2uri = {}
 
-CSV.open('/home/pobocks/Downloads/sca_classifications_2017-06-05 - Sheet1.csv').
+CSV.open(File.expand_path(ARGV.shift)).
                   to_a[2..-1].
                   each do |row|
   (identifier, title, desc) = row[2..-1]
