@@ -127,6 +127,28 @@ class AspaceIngester
     end
   end
 
+  def classifications_map(repo_id)
+    h = {'X-ArchivesSpace-Session' => @@auth || authorize,
+        'Content-type' => 'application/json; UTF-8'}
+    types = %w|classifications classification_terms|
+    types.map do |type|
+      res = Typhoeus.get(URI.join(@base_uri, "/repositories/#{repo_id}/#{type}"),
+                         headers: h, params: {all_ids: true})
+      if res.code == 200 && (type_ids = parse_json(res.body))
+        type_ids.map do |c_id|
+          res = Typhoeus.get(URI.join(@base_uri, "/repositories/#{repo_id}/#{type}/#{c_id}"),
+                             headers: h)
+          if res.code == 200 && (classification = parse_json(res.body))
+            classification.values_at('identifier', 'uri')
+          else
+            {}
+          end
+        end.to_h
+      else
+        {}
+      end
+    end.reduce(&:merge)
+  end
 
   def resource(repo_id:, id: nil, id_n: nil)
     if id
