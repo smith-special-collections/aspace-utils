@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 require './shared'
 ingest_logger = IngestLogger.new('ingestlog.log')
-
+error_logger = ErrorResponseLogger.new('error_responses')
 ingest_logger.info { "Start of Processing" }
 
 ingest_logger.info { "BEGIN INGEST" }
-client = AspaceIngester.new(ingest_logger)
+client = AspaceIngester.new(ingest_logger, error_logger)
 
 ingest_files = Dir[File.join($config['ingest_dir'], '*.xml')].
                sort.
