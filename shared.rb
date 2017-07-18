@@ -113,14 +113,15 @@ class AspaceIngester
         return agent_record['uri']
       end
     end
-    # Failure case
-    agent_data[:uri] = "/repositories/import/agent_corporate_entity/import_#{SecureRandom::uuid}"
+    # If it doesn't exist, create it!
+
+    agent_data[:uri] = "/repositories/import/#{agent_data[:jsonmodel_type]}/import_#{SecureRandom::uuid}"
     res = Typhoeus.post(URI.join(@base_uri, '/repositories/1/batch_imports'),
                         headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
                                   'Content-type' => 'application/json; UTF-8'},
                         body: JSON.dump([agent_data]))
 
-    if res.code == 200 && (payload = parse_json(res.body))
+    if res.code == 200 && (payload = parse_json(res.body)) && !payload.last.key?("errors")
       payload.last.values.last.values.last.first
     else
       nil
@@ -150,8 +151,9 @@ class AspaceIngester
     end.reduce(&:merge)
   end
 
-  def resource(repo_id:, id: nil, id_n: nil)
+  def resource(repo_id: nil, id: nil, id_n: nil)
     if id
+      raise "repo_id is required for id-based lookup" if !repo_id
       res = Typhoeus.get(URI.join(@base_uri, "/repositories/#{repo_id}/resources/#{id}"),
                          headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
                                    'Content-type' => 'application/json; charset=UTF-8'})
