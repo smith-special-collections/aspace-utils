@@ -10,7 +10,7 @@ ingest_logger.info { "Start of processing" }
 client = AspaceIngester.new(ingest_logger, error_logger)
 
 client.authorize
-repo_id = $config['repositories'][ARGV[1]]
+repo_id = $config['repositories']['manosca']
 
 # HACK: because event requires an agent, establish catchall agents by repo
 agent_data = {
