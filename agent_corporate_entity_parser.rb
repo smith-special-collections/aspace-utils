@@ -96,6 +96,12 @@ class CorporateEntityLoader
     publish: 53
   }
 
+  LinkedResourceFM = {
+    id_0: 54,
+    id_1: 55,
+    id_2: 56
+  }
+
   def initialize(fpath)
     csv = CSV.open(fpath)
     @contents = csv.to_a
@@ -189,10 +195,16 @@ class CorporateEntityLoader
 
     if row[ExtDocFM[:location]]
       agent[:external_documents] ||= []
-      agent[:external_documents] << ExtDocFM.reject{|k,_| k == :publish}.map {|k,v|
+      doc = ExtDocFM.reject{|k,_| k == :publish}.map {|k,v|
         [k, row[v]]
       }.to_h.merge(jsonmodel_type: 'external_document',
                    publish: row[ExtDocFM[:publish]] == '1')
+      doc[:title] = 'website' unless doc[:title] # default if missing
+      agent[:external_documents] << doc
+    end
+
+    if row[LinkedResourceFM[:id_0]]
+      agent[:linked_resource_id_n] = row.values_at(*LinkedResourceFM.values)
     end
 
     agent

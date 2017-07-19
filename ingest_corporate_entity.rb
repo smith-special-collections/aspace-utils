@@ -16,11 +16,30 @@ client.authorize
 
 agents = CorporateEntityLoader.new(File.expand_path(ARGV[0]))
 
-agents.each do |agent|
-  client.agent(agent)
+agent_uris = []
+resources = []
+
+agents.each.with_index do |agent, idx|
+  if agent[:linked_resource_id_n]
+    resources[idx] = client.resource(id_n: agent[:linked_resource_id_n])
+    agent.delete :linked_resource_id_n
+  end
+  agent_uris << client.agent(agent)
 end
 
 client.run
+
+agent_uris.each.with_index do |uri, idx|
+  if resources[idx]
+    record = JSON.parse(resources[idx]['json'])
+    unless record['linked_agents'] && record['linked_agents'].map {|agent|
+             agent['role'] == 'subject' && agent['ref'] == uri
+           }.any?
+      record['linked_agents'] << {'role' => 'subject', 'ref' => uri}
+      client.queue_update(record)
+    end
+  end
+end
 
 ingest_logger.info { "FINISHED INGEST" }
 

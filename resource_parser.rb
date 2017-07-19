@@ -99,7 +99,7 @@ class ResourceLoader
   CGASSCFM = {
     'type' => 50,
     'content' => 51,
-    'end' => 52,
+    'restriction_end_date' => 52,
     'local_access_restriction_type' => 53,
     'publish' => 54
   }
@@ -268,7 +268,7 @@ class ResourceLoader
   end
 
   # There are a bunch of note fields with similar structure, try and handle them generically
-  def handle_note!(fm, row, notes)
+  def handle_note!(fm, row, notes, temp_id: nil)
     if row[fm['content']]
       note = {
         'jsonmodel_type' => 'note_multipart',
@@ -284,7 +284,7 @@ class ResourceLoader
 
       note['label'] = row[fm['label']] if fm['label']
 
-      if fm['local_access_restriction_type']
+      if fm['local_access_restriction_type'] && row[fm['local_access_restriction_type']
         note['rights_restriction'] = {
           'jsonmodel_type' => 'rights_restriction',
           'publish' => row[fm['publish']] == '1',
@@ -474,11 +474,8 @@ class ResourceLoader
       }
     end
 
-
-
-# Ask Jasmin ASAP, need to talk this over
-#    handle_note!(CGAFM, row, notes)
-#    handle_note!(CGASSCFM, row, notes)
+    handle_note!(CGAFM, row, notes)
+    handle_note!(CGASSCFM, row, notes)
     handle_note!(CGUFM, row, notes)
     handle_note!(ExtLocCopFM, row, notes)
     handle_note!(ExtLocOrigFM, row, notes)
