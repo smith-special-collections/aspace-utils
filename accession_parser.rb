@@ -101,6 +101,7 @@ class AccessionLoader
   end
 
   def each(&block)
+    return @records.lazy.map {|record| process_row(record)} unless block_given?
     @records.each do |record|
       block.call(process_row(record))
     end

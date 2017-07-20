@@ -101,7 +101,7 @@ class AspaceIngester
     search_res = Typhoeus.get(URI.join(@base_uri, '/search'),
                               headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
                                         'Content-type' => 'application/json; UTF-8'},
-                              params: {q: "agents_text=\"#{agent_data[:names][0][:primary_name]}\"~0",
+                              params: {q: "agents_text:\"#{agent_data[:names][0][:primary_name]}\"~0",
                                        mm: '100%',
                                        page: 1,
                                        page_size: 250,
@@ -121,6 +121,39 @@ class AspaceIngester
                                   'Content-type' => 'application/json; UTF-8'},
                         body: JSON.dump([agent_data]))
 
+    if res.code == 200 && (payload = parse_json(res.body)) && !payload.last.key?("errors")
+      payload.last.values.last.values.last.first
+    else
+      nil
+    end
+  end
+
+  def subject(subject_data)
+    search_res = Typhoeus.get(URI.join(@base_uri, '/search/subjects'),
+                                       headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                                 'Content-type' => 'application/json; UTF-8'},
+                                       params: {
+                                         q: "subject_text=\"#{subject_data[:terms][0][:term]}\"~0",
+                                         mm: '100%',
+                                         page: 1,
+                                         page_size: 250,
+                                         type: ['subject']})
+
+    if search_res.code == 200 && (payload = parse_json(search_res.body)) && !payload['results'].empty?
+      subject_record = parse_json(payload['results'][0]['json'])
+
+      if subject_record['terms'][0]['term'] == subject_data[:terms][0][:term]
+        return subject_record['uri']
+      end
+    end
+
+    # If it doesn't exist, create it!
+    subject_data[:uri] ||= "/repositories/import/#{subject_data[:jsonmodel_type]}/import_#{SecureRandom.uuid}"
+
+    res = Typhoeus.post(URI.join(@base_uri, "/repositories/1/batch_imports"),
+                         headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                   'Content-type' => 'application/json; UTF-8'},
+                         body: JSON.dump([subject_data]))
     if res.code == 200 && (payload = parse_json(res.body)) && !payload.last.key?("errors")
       payload.last.values.last.values.last.first
     else
@@ -157,6 +190,8 @@ class AspaceIngester
       res = Typhoeus.get(URI.join(@base_uri, "/repositories/#{repo_id}/resources/#{id}"),
                          headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
                                    'Content-type' => 'application/json; charset=UTF-8'})
+
+
       if res.code == 200
         parse_json(res.body)
       else
@@ -180,6 +215,25 @@ class AspaceIngester
         nil
       end
 
+    end
+  end
+
+  def accession(id_n:)
+    search_res = Typhoeus.get(URI.join(@base_uri, '/search'),
+                              headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                        'Content-type' => 'application/json; UTF-8'},
+                              params: {q: "identifier=\"#{id_n.compact.join('-')}\"~0",
+                                       mm: '100%',
+                                       page: 1,
+                                       page_size: 250,
+                                       type: ['accession']})
+    if search_res.code == 200 && (search_payload = parse_json(search_res.body))
+      accession = search_payload['results'].find do |el|
+        JSON.parse(el['json']).values_at(*%w|id_0 id_1 id_2 id_3|).compact == id_n.compact
+      end
+      accession
+    else
+      nil
     end
   end
 

@@ -20,7 +20,7 @@ resources = []
 
 agents.each.with_index do |agent, idx|
   if agent[:linked_resource_id_n]
-    resources[idx] = client.resource(id_n: agent[:linked_resource_id_n])
+    resources[idx] = agent[:linked_resource_id_n]
     agent.delete :linked_resource_id_n
   end
   agent_uris << client.agent(agent)
@@ -28,16 +28,26 @@ end
 
 client.run
 
-agent_uris.each.with_index do |uri, idx|
-  if resources[idx]
-    record = JSON.parse(resources[idx]['json'])
+# id_n -> [agent_uri, ...]
+idn_2_uris = agent_uris.
+             map.
+             with_index.
+             group_by {|s, i| resources[i]}.map {|k,v| [k, v.map(&:first)]}.to_h
+
+idn_2_uris.each_pair do |id_n, uris|
+  req = client.resource(id_n: id_n)
+  record = JSON.parse(req['json'])
+  uris.each do |uri|
     unless record['linked_agents'] && record['linked_agents'].map {|agent|
-         agent['role'] == 'subject' && agent['ref'] == uri
-       }.any?
+             agent['role'] == 'subject' && agent['ref'] == uri
+           }.any?
       record['linked_agents'] << {'role' => 'subject', 'ref' => uri}
-      client.queue_update(record)
     end
   end
+  client.queue_update(record)
+  client.run
 end
 
-client.run
+ingest_logger.info { "FINISHED INGEST" }
+
+client.close
