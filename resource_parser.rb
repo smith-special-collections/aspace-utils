@@ -284,7 +284,7 @@ class ResourceLoader
 
       note['label'] = row[fm['label']] if fm['label']
 
-      if fm['local_access_restriction_type'] && row[fm['local_access_restriction_type']
+      if fm['local_access_restriction_type'] && row[fm['local_access_restriction_type']]
         note['rights_restriction'] = {
           'jsonmodel_type' => 'rights_restriction',
           'publish' => row[fm['publish']] == '1',
