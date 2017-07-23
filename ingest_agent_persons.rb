@@ -37,15 +37,21 @@ idn_2_uris = agent_uris.
 idn_2_uris.each_pair do |id_n, uris|
   req = client.resource(id_n: id_n)
   record = JSON.parse(req['json'])
-  uris.each do |uri|
-    unless record['linked_agents'] && record['linked_agents'].map {|agent|
-             agent['role'] == 'subject' && agent['ref'] == uri
-           }.any?
-      record['linked_agents'] << {'role' => 'subject', 'ref' => uri}
+
+  if record
+    ingest_logger.info {"Linking #{id_n.join('-')}"}
+    uris.each do |uri|
+      unless record['linked_agents'] && record['linked_agents'].map {|agent|
+               agent['role'] == 'subject' && agent['ref'] == uri
+             }.any?
+        ingest_logger.info {"URI: #{uri}"}
+        record['linked_agents'] << {'role' => 'subject', 'ref' => uri}
+      end
     end
+    client.queue_update(record)
+    client.run
   end
-  client.queue_update(record)
-  client.run
+
 end
 
 ingest_logger.info { "FINISHED INGEST" }

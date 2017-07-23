@@ -2,7 +2,7 @@
 require './shared'
 require './subject_parser'
 
-repo_id = $config['repositories'][ARGV[1]]
+repo_id = $config['repositories']['mnsss']
 
 ingest_logger = IngestLogger.new('ingestlog.subjects.log')
 error_logger = ErrorResponseLogger.new('error_log.subjects.log')
@@ -37,15 +37,17 @@ idn_2_uris = subject_uris.
 idn_2_uris.each_pair do |id_n, uris|
   req = client.resource(id_n: id_n)
   record = JSON.parse(req['json'])
-  uris.each do |uri|
-    unless record['subjects'] && record['subjects'].map {|subject|
-             subject['ref'] == uri
-           }.any?
-      record['subjects'] << {'ref' => uri}
+  if record
+    uris.each do |uri|
+      unless record['subjects'] && record['subjects'].map {|subject|
+               subject['ref'] == uri
+             }.any?
+        record['subjects'] << {'ref' => uri}
+      end
     end
+    client.queue_update(record)
+    client.run
   end
-  client.queue_update(record)
-  client.run
 end
 
 ingest_logger.info { "FINISHED INGEST" }

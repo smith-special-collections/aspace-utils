@@ -268,7 +268,7 @@ class ResourceLoader
   end
 
   # There are a bunch of note fields with similar structure, try and handle them generically
-  def handle_note!(fm, row, notes, temp_id: nil)
+  def handle_note!(fm, row, notes)
     if row[fm['content']]
       note = {
         'jsonmodel_type' => 'note_multipart',
@@ -288,9 +288,11 @@ class ResourceLoader
         note['rights_restriction'] = {
           'jsonmodel_type' => 'rights_restriction',
           'publish' => row[fm['publish']] == '1',
-          'local_access_restriction_type' => row[fm['local_access_restriction_type']]
+          'local_access_restriction_type' => [row[fm['local_access_restriction_type']]]
         }
-        note['rights_restriction']['end'] = row[fm['end']] if row[fm['end']]
+        if fm['restriction_end_date'] && row[fm['restriction_end_date']]
+          note['rights_restriction']['end'] = row[fm['restriction_end_date']]
+        end
       end
       notes << note
     end
