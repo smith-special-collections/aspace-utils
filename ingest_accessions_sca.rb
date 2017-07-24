@@ -33,7 +33,7 @@ classifications = client.classifications_map(repo_id)
 accessions = AccessionLoader.new(File.expand_path(ARGV[0]), repo_id, client, agent_uri, classifications: classifications)
 
 accessions.each do |batch|
-  client.queue_json(batch, repo_id, "#{batch[0].values_at('id_0', 'id_1', 'id_2').compact.join('-')}")
+  client.queue_json(batch, repo_id, "#{batch[0].values_at(:id_0, :id_1, :id_2).compact.join('-')}")
 end
 
 client.run

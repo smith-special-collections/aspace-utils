@@ -16,7 +16,7 @@ agents = AccessionAgentLoader.new(File.expand_path(ARGV[0]))
 agent_uris = []
 accessions = []
 
-agents.take(10).each.with_index do |agent, idx|
+agents.each.with_index do |agent, idx|
   if agent[:linked_acc_id_n]
     accessions[idx] = agent[:linked_acc_id_n]
     agent.delete :linked_acc_id_n
@@ -38,16 +38,18 @@ idn_2_uris.each_pair do |id_n, uris|
   req = client.accession(id_n: id_n)
   record = JSON.parse(req['json'])
   ingest_logger.info {"Linking #{id_n.join("-")}"}
-  uris.each do |uri|
-    unless record['linked_agents'] && record['linked_agents'].map {|agent|
-             agent['role'] == 'source' && agent['ref'] == uri
-           }.any?
-      ingest_logger.info {"URI: #{uri}"}
-      record['linked_agents'] << {'role' => 'source', 'ref' => uri}
+  if record
+    uris.each do |uri|
+      unless record['linked_agents'] && record['linked_agents'].map {|agent|
+               agent['role'] == 'source' && agent['ref'] == uri
+             }.any?
+        ingest_logger.info {"URI: #{uri}"}
+        record['linked_agents'] << {'role' => 'source', 'ref' => uri}
+      end
     end
+    client.queue_update(record)
+    client.run
   end
-  client.queue_update(record)
-  client.run
 end
 
 ingest_logger.info { "FINISHED INGEST" }
