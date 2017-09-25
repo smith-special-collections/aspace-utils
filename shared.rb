@@ -97,6 +97,20 @@ class AspaceIngester
     raise "Failed to aquire auth"
   end
 
+  def add_agent(agent_data)
+    agent_data[:uri] = "/repositories/import/#{agent_data[:jsonmodel_type]}/import_#{SecureRandom::uuid}"
+    res = Typhoeus.post(URI.join(@base_uri, '/repositories/1/batch_imports'),
+                        headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
+                                  'Content-type' => 'application/json; UTF-8'},
+                        body: JSON.dump([agent_data]))
+
+    if res.code == 200 && (payload = parse_json(res.body)) && !payload.last.key?("errors")
+      payload.last.values.last.values.last.first
+    else
+      nil
+    end
+  end
+
   def agent(agent_data)
     search_res = Typhoeus.get(URI.join(@base_uri, '/search'),
                               headers: {'X-ArchivesSpace-Session' => @@auth || authorize,
